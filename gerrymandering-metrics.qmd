@@ -5,6 +5,23 @@ format: typst
 
 ### 2024 Election Results and the 2024 District Map
 
+```{r}
+# Mean-Median Score
+votes <- votes |>
+  mutate(d_share = d_votes / (d_votes + r_votes))
+
+mean_median_score <- mean(votes$d_share) - median(votes$d_share)
+mean_median_score
+```
+
+
+```{r}
+# Efficiency Gap
+n_wasted <- function(by, against) {
+    n_wasted <- rep(0,(by, length(by))
+    w_threshold <- floor((by + against)/2) + 1
+    n_wasted
+```
 
 
 ### 2024 Election Results and the proposed 2025 District Map

@@ -3,3 +3,45 @@ title: Data Cleaning
 format: typst
 ---
 
+
+```{r}
+# Loading Packages
+library(tidyverse)
+library(janitor)
+library(readr)
+```
+
+
+```{r}
+# Read in raw precinct-level vote data
+raw_path <- "/mnt/data/c073_g24_sov_data_by_g24_svprec.csv"
+
+raw_sd <- read_csv(raw_path)
+glimpse(raw_sd)
+```
+
+
+```{r}
+# Clean column names and basic formatting
+sd_clean <- raw_sd |>
+  clean_names() |>                                    
+  mutate(across(where(is.character), str_squish)) |>  # remove whitespace
+  mutate(across(where(is.numeric), ~replace_na(., 0))) # fill NA values with 0
+```
+
+
+```{r}
+# Make vote counts numeric
+vote_cols <- sd_clean |>
+  select(contains("vote"), contains("votes"), contains("ballot")) |>
+  names()
+
+sd_clean <- sd_clean |>
+  mutate(across(all_of(vote_cols), ~as.numeric(.)))
+```
+
+
+```{r}
+# Write cleaned dataset
+write_csv(sd_clean, "san_diego_2024_general_clean.csv")
+```

@@ -5,24 +5,68 @@ format: typst
 
 ### Question 1
 
-Put your question here.
+*** How Big Are The Precincts? ***
 
 ### Answer 1
 
-Put your answer here.
+```{r}
+precinct_sizes <- sd |>
+group_by(precinct) |>
+summarize(total_votes = sum(votes, na.rm = TRUE))
+summary(precinct_sizes$total_votes)
+
+# Graph for Answer
+precinct_sizes |>
+ggplot(aes(x = total_votes)) +
+geom_histogram(bins = 40) +
+    labs(title = "Distribution of Precinct Sizes",
+        x = "Total Votes Cast",
+        y = "Number of Precincts")
+```
 
 ### Question 2
 
-Put your question here.
+*** Which precincts had the closest races? ***
 
 ### Answer 2
 
-Put your answer here.
+```{r}
+sd_long <- sd |>
+select(precinct, contest, candidate, votes) |>
+group_by(precinct, contest) |>
+mutate(rank = rank(-votes)) |>
+ungroup()
+
+margins <- sd_long |>
+filter(rank <= 2) |>
+group_by(precinct, contest) |>
+summarize(
+    first = max(votes),
+    second = min(votes),
+    margin = first - second,
+    .groups = "drop"
+) |>
+arrange(margin)
+head(margins, 10)
+```
 
 ### Question 3
 
-Put your question here.
+*** Which races were the biggest blowouts(winners winning by the largest margin)? ***
 
 ### Answer 3
 
-Put your answer here.
+```{r}
+contest_margins <- sd_long |>
+group_by(contest) |>
+summarize(
+    total_votes = sum(votes),
+    top_votes = max(votes),
+    runner_up = sort(votes, decreasing = TRUE)[2],
+    margin = top_votes - runner_up,
+    margin_share = margin / total_votes,
+    .groups = "drop"
+) |>
+arrange(desc(margin_share))
+head(contest_margins, 10)
+```
